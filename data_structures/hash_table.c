@@ -104,6 +104,8 @@ void freeHashTable(HashTable *this) {
         }
         i++;
     }
+    free(this->table);
+    free(this);
 }
 
 HashTable* init_hash_table(void) {
@@ -133,6 +135,7 @@ HashTable* init_hash_table(void) {
     return table;
 }
 
+
 int main(void) {
     HashTable *hash_table = init_hash_table();
 
@@ -143,6 +146,16 @@ int main(void) {
     KeyValue *target2 = hash_table->search(hash_table, "second");
     KeyValue *null_target = hash_table->search(hash_table, "unknown");
 
-    hash_table->free(hash_table);
+    if (target1) {
+        printf("Key: first, Value: %d\n", target1->value);
+    }
+    if (target2) {
+        printf("Key: second, Value: %d\n", target2->value);
+    }
+    if (!null_target) {
+        printf("Key 'unknown' not found.\n");
+    }
+
+    hash_table->free(hash_table);  // Освобождаем память перед выходом
     return 0;
 }

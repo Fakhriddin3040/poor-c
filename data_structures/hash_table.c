@@ -4,6 +4,9 @@
 
 
 #define HASH_TABLE_SIZE 1000
+#define HASH_TABLE_KEY_NOT_FOUND -0111111111
+#define HASH_TABLE_MEM_ALL_ERR_MSG \
+        "Memory allocation failed for HashTable\n"
 
 
 typedef struct KeyValue {
@@ -12,11 +15,14 @@ typedef struct KeyValue {
     struct KeyValue *next;
 } KeyValue;
 
+typedef struct HashTable {
+    KeyValue **table;
+    struct KeyValue* (*search)(struct HashTable *, const char *);
+    int (*insert)(struct HashTable *, const char *, int);
+    int (*hash)(const char *);
+    void (*free)(struct HashTable *);
+} HashTable;
 
-typedef KeyValue* HashTable;
-
-
-HashTable hashTable[HASH_TABLE_SIZE] = {NULL};
 
 KeyValue* getLatestPair(KeyValue *pair) {
     while(pair->next != NULL) {
@@ -38,7 +44,7 @@ int hash(const char *key) {
 }
 
 
-void insert(const char *key, int value) {
+int insert(HashTable *this, const char *key, int value) {
     KeyValue *newPair = malloc(sizeof(KeyValue));
 
     if(newPair == NULL) {
@@ -56,38 +62,39 @@ void insert(const char *key, int value) {
     newPair->value = value;
     newPair->next = NULL;
 
-    int index = hash(key);
+    int index = this->hash(key);
 
 
-   if(hashTable[index] == NULL) {
-        hashTable[index] = newPair;
+   if(this->table[index] == NULL) {
+        this->table[index] = newPair;
    } else {
-        newPair->next = hashTable[index];
-        hashTable[index] = newPair;
+        newPair->next = this->table[index];
+        this->table[index] = newPair;
    }
+   return 0;
 }
 
 
-int search(const char *key) {
-    unsigned long int index = hash(key);
-    KeyValue *entry = hashTable[index];
+KeyValue* search(HashTable *this, const char *key) {
+    int index = this->hash(key);
+    KeyValue *entry = this->table[index];
 
     while(entry != NULL) {
         if(strcmp(entry->key, key) == 0) {
-            return entry->value;
+            return entry;
         }
         entry = entry->next;
     }
-    return -1;
+    return NULL;
 }
 
 
-void freeHashTable(HashTable *hashTable, size_t size) {
+void freeHashTable(HashTable *this) {
     KeyValue *entry;
     unsigned int i = 0;
-    while(i != size) {
+    while(i != HASH_TABLE_SIZE) {
 
-        entry = hashTable[i];
+        entry = this->table[i];
 
         while(entry != NULL) {
             KeyValue *tmp = entry;
@@ -95,12 +102,47 @@ void freeHashTable(HashTable *hashTable, size_t size) {
             free(tmp->key);
             free(tmp);
         }
-
         i++;
     }
 }
 
+HashTable* init_hash_table(void) {
+    HashTable *table = malloc(sizeof(HashTable));
 
-int main(int argc, char const *argv[]) {
+    if(table == NULL) {
+        fprintf(stderr, HASH_TABLE_MEM_ALL_ERR_MSG);
+        exit(EXIT_FAILURE);
+    }
+
+    table->table = malloc(sizeof(KeyValue *) * HASH_TABLE_SIZE);
+
+    if(table->table == NULL) {
+        fprintf(stderr, HASH_TABLE_MEM_ALL_ERR_MSG);
+        exit(EXIT_FAILURE);
+    }
+
+    for(size_t i = 0; i < HASH_TABLE_SIZE; i++) {
+        table->table[i] = NULL;
+    }
+
+    table->search = search;
+    table->insert = insert;
+    table->hash = hash;
+    table->free = freeHashTable;
+
+    return table;
+}
+
+int main(void) {
+    HashTable *hash_table = init_hash_table();
+
+    hash_table->insert(hash_table, "first", 8249);
+    hash_table->insert(hash_table, "second", 39289);
+
+    KeyValue *target1 = hash_table->search(hash_table, "first");
+    KeyValue *target2 = hash_table->search(hash_table, "second");
+    KeyValue *null_target = hash_table->search(hash_table, "unknown");
+
+    hash_table->free(hash_table);
     return 0;
 }

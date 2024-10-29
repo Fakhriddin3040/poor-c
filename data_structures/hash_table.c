@@ -16,16 +16,6 @@ typedef struct KeyValue {
 typedef KeyValue* HashTable;
 
 
-typedef struct ClassHashTable {
-    HashTable HashTable;
-
-    void *(insert)(int number) {
-        printf("Struct function");
-    }
-} ClassHashTable;
-
-
-
 HashTable hashTable[HASH_TABLE_SIZE] = {NULL};
 
 KeyValue* getLatestPair(KeyValue *pair) {
@@ -112,9 +102,5 @@ void freeHashTable(HashTable *hashTable, size_t size) {
 
 
 int main(int argc, char const *argv[]) {
-    insert("Python", 1);
-    insert("niga", 69);
-
-    freeHashTable(hashTable, HASH_TABLE_SIZE);
     return 0;
 }

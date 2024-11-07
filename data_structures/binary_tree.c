@@ -121,21 +121,3 @@ BinTree* create_binary_tree(void) {
 
     return tree;
 }
-
-
-int main(void) {
-    BinTree *tree = create_binary_tree();
-
-    tree->insert(tree, &(tree->root), 69);
-    tree->insert(tree, &(tree->root), 70);
-    tree->insert(tree, &(tree->root), 43);
-
-    Node *first_value = tree->search(tree, tree->root, 69);
-    Node *second_value = tree->search(tree, tree->root, 70);
-    Node *third_value = tree->search(tree, tree->root, 43);
-    Node *null_value = tree->search(tree, tree->root, 3432);
-
-    printf("Success");
-
-    return 0;
-} 

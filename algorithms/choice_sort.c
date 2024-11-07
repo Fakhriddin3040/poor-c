@@ -1,36 +1,28 @@
 #include <stdio.h>
-#include <stdbool.h>
+#include <stdlib.h>
+
+#define ARR_SIZE 10
+
+int arr[ARR_SIZE] = {-1, -6, 1, 3, 356, 7, 22, 14, 976, 24};
 
 
-void choiceSort(int *arr, size_t size) {
-    int min, tmp;
+int choose_sort(int *arr, size_t size) {
+    int tmp, min = 0;
 
-    for(int left = 0; left < size - 1; left++) {
+    for(size_t left = 0; left < size - 1; left++) {
         min = left;
-        for(int right = left + 1; right < size; right++) {
+
+        for(size_t right = left + 1; right < size; right++) {
+
             if(arr[right] < arr[min]) {
                 min = right;
-                }
             }
-        if(arr[min] < arr[left]) {
+        }
+        if(arr[min] != arr[left]) {
             tmp = arr[left];
             arr[left] = arr[min];
             arr[min] = tmp;
         }
     }
-}
-
-int main(int argc, char const *argv[]) {
-    int arr[] = {0, -21, 4, -1, 10, 5, 3, 10, 123};
-    int *arr_ptr = arr;
-    size_t arr_size = sizeof(arr) / sizeof(*arr);
-
-    choiceSort(arr, arr_size);
-
-    while(arr_ptr != arr + arr_size) {
-        printf("%d\n", *arr_ptr);
-        arr_ptr++;
-    }
-    printf("\n");
     return 0;
 }

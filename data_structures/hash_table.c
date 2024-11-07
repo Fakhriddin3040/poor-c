@@ -156,6 +156,6 @@ int main(void) {
         printf("Key 'unknown' not found.\n");
     }
 
-    hash_table->free(hash_table);  // Освобождаем память перед выходом
+    hash_table->free(hash_table);
     return 0;
 }

@@ -15,8 +15,11 @@ typedef struct BinTree {
     struct Node *root;
 
     int (*insert)(struct BinTree *, Node **, int);
-    struct Node* (*create_node)(int);
-    struct Node* (*search)(struct BinTree *, struct Node *, int);
+    Node* (*create_node)(int);
+    Node* (*search)(struct BinTree *,Node *, int);
+    Node* (*get_max)(struct BinTree *, Node *);
+    Node* (*get_min)(struct BinTree *, Node *);
+    void* (*delete)(struct BinTree*, Node **, int);
 } BinTree;
 
 
@@ -49,6 +52,48 @@ int insert_node(BinTree *tree, Node **root, int data) {
 }
 
 
+Node* delete_node(BinTree *this, Node **root, int data) {
+    if(*root == NULL) {
+        return NULL;
+    }
+    else if((*root)->data > data) return this->delete(this, &((*root)->left), data);
+    else if((*root)->data < data) return this->delete(this, &((*root)->right), data);
+    else {
+        if((*root)->right == NULL || (*root)->left == NULL) {
+            *root = ((*root)->right == NULL) ? (*root)->left : (*root)->right; 
+        }
+        else {
+            Node *max_in_left = this->get_max(this, (*root)->left);
+            (*root)->data = max_in_left->data;
+            (*root)->left = this->delete(this, &((*root)->left), max_in_left->data);
+        }
+    }
+    return *root;
+}
+
+
+Node* get_max(BinTree *tree, Node *root) {
+    if(tree->root == NULL) {
+        return NULL;
+    }
+    if(tree->root->right == NULL) {
+        return tree->root;
+    }
+    return get_max(tree, root->right);
+}
+
+
+Node* get_min(BinTree *tree, Node *root) {
+    if(tree->root == NULL) {
+        return NULL;
+    }
+    if(tree->root->left == NULL) {
+        return tree->root;
+    }
+    return get_min(tree, root->left);
+}
+
+
 Node* search(BinTree *tree, Node *root, int data) {
     if(root == NULL) {
         return NULL;
@@ -69,6 +114,8 @@ BinTree* create_binary_tree(void) {
     tree->create_node = create_node;
     tree->insert = insert_node;
     tree->search = search;
+    tree->get_max = get_max;
+    tree->get_min = get_min;
 
     tree->root = tree->create_node(1000);
 
